@@ -2,15 +2,12 @@
 	"name": "vscode-custom-contextmemu",
 	"displayName": "Custom Contextmemu",
 	"description": "Custom Cleaner Contextmemu for Visual Studio Code",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"publisher": "BHznJNs",
 	"engines": {
 		"vscode": "^1.92.0"
 	},
-	"categories": [
-		"Other",
-		"Themes"
-	],
+	"categories": ["Other"],
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/BHznJNs/vscode-custom-contextmenu"
@@ -42,8 +39,6 @@
 		"eslint-config-prettier": "^8.5.0"
 	},
 	"dependencies": {
-		"file-url": "^3.0.0",
-		"node-fetch": "^2.0.0",
 		"uuid": "^8.3.2"
 	},
 	"extensionKind": [

@@ -4,7 +4,7 @@
  * source: https://github.com/microsoft/vscode/issues/75930#issuecomment-2310690013
  */
 
-(function () {
+(function() {
   console.log("Hello from custom_context_menu.js~");
 
   const selectors = [
