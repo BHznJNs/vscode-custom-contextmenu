@@ -2,7 +2,7 @@
 	"name": "vscode-custom-contextmenu",
 	"displayName": "Custom Contextmenu",
 	"description": "Custom Cleaner Contextmenu for Visual Studio Code",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"publisher": "BHznJNs",
 	"engines": {
 		"vscode": "^1.92.0"
@@ -32,7 +32,24 @@
 				"command": "custom-contextmenu.uninstallCustomContextmenu",
 				"title": "Disable Custom Contextmenu"
 			}
-		]
+		],
+		"configuration": {
+			"type": "object",
+			"properties": {
+				"custom-contextmenu.showGoTos": {
+					"title": "Show Go-Tos",
+					"type": "boolean",
+					"default": true,
+					"description": "This option will control: Go to Definition, Go to Type Definition, Go to Implementations, Go to References, Go to Source Definition."
+				},
+				"custom-contextmenu.showClipboardItems": {
+					"title": "Show Clipboard Items",
+					"type": "boolean",
+					"default": true,
+					"description": "This option will control: Cut, Copy, Paste."
+				}
+			}
+		}
 	},
 	"devDependencies": {
 		"eslint": "^8.21.0",

@@ -6,6 +6,8 @@
 
 (function() {
   console.log("Hello from custom_context_menu.js~");
+  const showGoTos = %showGoTos%;
+  const showClipboardItems = %showClipboardItems%;
 
   const selectors = [
     /// original selectors
@@ -18,8 +20,6 @@
     /// '"_":has( + "Command Palette...")',
     /// '"Layout Controls"',
 
-    '"Run Code"',
-    '^"Go to"', '^"转到"', // start with "Go to"
     '"Change All Occurrences"', // exact match
 
     '^"Find All"', '^"查找所有"',
@@ -33,11 +33,19 @@
     '"Command Palette..."', '"命令面板..."',
     '"_":has( + "Command Palette...")', '"_":has( + "命令面板...")',
 
-    '"Cut"', '"Copy"', '"Paste"',
-    '"剪切"', '"复制"', '"粘贴"',
     '"Layout Controls"',
     '^"Git"', '"_":has( + ^"Git")',
   ];
+  if (showGoTos) {
+    // start with "Go to"
+    selectors.push('^"Go to"', '^"转到"')
+  }
+  if (showClipboardItems) {
+    selectors.push(
+      '"Cut"', '"Copy"', '"Paste"',
+      '"剪切"', '"复制"', '"粘贴"',
+    )
+  }
 
   const css_selectors = selectors
     .join(",\n")

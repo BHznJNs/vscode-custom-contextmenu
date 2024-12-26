@@ -128,10 +128,6 @@ function activate(context) {
 		return html;
 	}
 
-	function patchIsProperlyConfigured(config) {
-		return config && config.imports && config.imports instanceof Array;
-	}
-
 	async function patchScript() {
 		const fileUri = vscode.Uri.joinPath(context.extensionUri, 'src', 'static', 'user.js');
 		let fileContent
@@ -140,6 +136,11 @@ function activate(context) {
 		} catch (error) {
 			vscode.window.showErrorMessage(`Error reading file: ${error.message}`);
 		}
+		const config = vscode.workspace.getConfiguration('custom-contextmenu');
+		const showGoTos = config.get('showGoTos');
+		const showClipboardItems = config.get('showClipboardItems');
+		fileContent = fileContent.replace('%showGoTos%', showGoTos);
+		fileContent = fileContent.replace('%showClipboardItems%', showClipboardItems);
 		return `<script>${fileContent}</script>`;
 	}
 
