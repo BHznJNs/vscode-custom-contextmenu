@@ -173,11 +173,11 @@ function activate(context) {
 	}
 
 	const installCustomCSS = vscode.commands.registerCommand(
-		"custom-contextmemu.installCustomContextmenu",
+		"custom-contextmenu.installCustomContextmenu",
 		cmdInstall
 	);
 	const uninstallCustomCSS = vscode.commands.registerCommand(
-		"custom-contextmemu.uninstallCustomContextmenu",
+		"custom-contextmenu.uninstallCustomContextmenu",
 		cmdUninstall
 	);
 
@@ -192,6 +192,6 @@ exports.activate = activate;
 
 // this method is called when your extension is deactivated
 function deactivate() {
-	vscode.commands.executeCommand("custom-contextmemu.uninstallCustomContextmenu")
+	vscode.commands.executeCommand("custom-contextmenu.uninstallCustomContextmenu")
 }
 exports.deactivate = deactivate;
