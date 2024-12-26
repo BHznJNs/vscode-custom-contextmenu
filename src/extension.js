@@ -1,11 +1,8 @@
 const vscode = require("vscode");
 const fs = require("fs");
-const os = require("os");
 const path = require("path");
 const msg = require("./messages").messages;
 const uuid = require("uuid");
-const fetch = require("node-fetch");
-const Url = require("url");
 
 function activate(context) {
 	const appDir = require.main
@@ -26,53 +23,14 @@ function activate(context) {
 	const BackupFilePath = uuid =>
 		path.join(base, "electron-sandbox", "workbench", `workbench.${uuid}.bak-custom-css`);
 
-	function resolveVariable(key) {
-		const variables = {
-			cwd: () => process.cwd(),
-			userHome: () => os.homedir(),
-			execPath: () => process.env.VSCODE_EXEC_PATH ?? process.execPath,
-			pathSeparator: () => path.sep,
-			"/": () => path.sep,
-		};
-
-		if (key in variables) return variables[key]();
-
-		if (key.startsWith('env:')) {
-			const [_, envKey, optionalDefault] = key.split(':');
-			return process.env[envKey] ?? optionalDefault ?? '';
-		}
-	}
-	function parsedUrl(url) {
-		if (/^file:/.test(url)) {
-			// regex matches any "${<RESOLVE>}" and replaces with resolveVariable(<RESOLVE>)
-			// eg:  "HELLO ${userHome} WORLD" -> "HELLO /home/username WORLD"
-			const resolved = url.replaceAll(/\$\{([^\{\}]+)\}/g, (substr, key) => resolveVariable(key) ?? substr);
-			return Url.fileURLToPath(resolved);
-		} else {
-			return url
-		}
-	}
-
-	async function getContent(url) {
-		if (/^file:/.test(url.toString())) {
-			return await fs.promises.readFile(url);
-		} else {
-			const response = await fetch(url);
-			return response.buffer();
-		}
-	}
-
 	// ####  main commands ######################################################
 
 	async function cmdInstall() {
 		const uuidSession = uuid.v4();
+		console.log("contextmenu", "enable")
 		await createBackup(uuidSession);
 		await performPatch(uuidSession);
-	}
-
-	async function cmdReinstall() {
-		await uninstallImpl();
-		await cmdInstall();
+		enabledRestart();
 	}
 
 	async function cmdUninstall() {
@@ -148,17 +106,13 @@ function activate(context) {
 		let html = await fs.promises.readFile(htmlFile, "utf-8");
 		html = clearExistingPatches(html);
 
-		const injectHTML = await patchHtml(config);
+		const injectHTML = await patchScript(config);
 		html = html.replace(/<meta\s+http-equiv="Content-Security-Policy"[\s\S]*?\/>/, "");
-
-		let indicatorJS = "";
-		if (config.statusbar) indicatorJS = await getIndicatorJs();
 
 		html = html.replace(
 			/(<\/html>)/,
 			`<!-- !! VSCODE-CUSTOM-CSS-SESSION-ID ${uuidSession} !! -->\n` +
 				"<!-- !! VSCODE-CUSTOM-CSS-START !! -->\n" +
-				indicatorJS +
 				injectHTML +
 				"<!-- !! VSCODE-CUSTOM-CSS-END !! -->\n</html>"
 		);
@@ -169,7 +123,6 @@ function activate(context) {
 			disabledRestart();
 			return
 		}
-		enabledRestart();
 	}
 	function clearExistingPatches(html) {
 		html = html.replace(
@@ -184,47 +137,15 @@ function activate(context) {
 		return config && config.imports && config.imports instanceof Array;
 	}
 
-	async function patchHtml(config) {
-		let res = "";
-		for (const item of config.imports) {
-			const imp = await patchHtmlForItem(item);
-			if (imp) res += imp;
-		}
-		return res;
-	}
-	async function patchHtmlForItem(url) {
-		if (!url) return "";
-		if (typeof url !== "string") return "";
-
-		// Copy the resource to a staging directory inside the extension dir
-		let parsed = new Url.URL(url);
-		const ext = path.extname(parsed.pathname);
-
+	async function patchScript() {
+		const fileUri = vscode.Uri.joinPath(context.extensionUri, 'src', 'static', 'user.js');
+		let fileContent
 		try {
-			parsed = parsedUrl(url)
-			const fetched = await getContent(parsed);
-			if (ext === ".css") {
-				return `<style>${fetched}</style>`;
-			} else if (ext === ".js") {
-				return `<script>${fetched}</script>`;
-			}
-			throw new Error(`Unsupported extension type: ${ext}`);
-		} catch (e) {
-			console.error(e);
-			vscode.window.showWarningMessage(msg.cannotLoad(parsed.toString()));
-			return "";
+			fileContent = await fs.promises.readFile(fileUri.fsPath, 'utf8');
+		} catch (error) {
+			vscode.window.showErrorMessage(`Error reading file: ${error.message}`);
 		}
-	}
-	async function getIndicatorJs() {
-		let indicatorJsPath;
-		let ext = vscode.extensions.getExtension("be5invis.vscode-custom-css");
-		if (ext && ext.extensionPath) {
-			indicatorJsPath = path.resolve(ext.extensionPath, "src/statusbar.js");
-		} else {
-			indicatorJsPath = path.resolve(__dirname, "statusbar.js");
-		}
-		const indicatorJsContent = await fs.promises.readFile(indicatorJsPath, "utf-8");
-		return `<script>${indicatorJsContent}</script>`;
+		return `<script>${fileContent}</script>`;
 	}
 
 	function reloadWindow() {
@@ -252,21 +173,16 @@ function activate(context) {
 	}
 
 	const installCustomCSS = vscode.commands.registerCommand(
-		"extension.installCustomCSS",
+		"custom-contextmemu.installCustomContextmenu",
 		cmdInstall
 	);
 	const uninstallCustomCSS = vscode.commands.registerCommand(
-		"extension.uninstallCustomCSS",
+		"custom-contextmemu.uninstallCustomContextmenu",
 		cmdUninstall
-	);
-	const updateCustomCSS = vscode.commands.registerCommand(
-		"extension.updateCustomCSS",
-		cmdReinstall
 	);
 
 	context.subscriptions.push(installCustomCSS);
 	context.subscriptions.push(uninstallCustomCSS);
-	context.subscriptions.push(updateCustomCSS);
 
 	console.log("vscode-custom-css is active!");
 	console.log("Application directory", appDir);
@@ -275,5 +191,7 @@ function activate(context) {
 exports.activate = activate;
 
 // this method is called when your extension is deactivated
-function deactivate() {}
+function deactivate() {
+	vscode.commands.executeCommand("custom-contextmemu.uninstallCustomContextmenu")
+}
 exports.deactivate = deactivate;

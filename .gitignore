@@ -3,3 +3,4 @@ test
 .vscode
 .vsixmanifest
 .staging-custom-css
+*.vsix
