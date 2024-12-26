@@ -50,7 +50,6 @@
   const css_selectors = selectors
     .join(",\n")
     .replaceAll(/([*^|])?"(.+?)"/g, '[aria-label\x241="\x242"]');
-  console.log(css_selectors);
 
   function wait_for(root) {
     const selector = ".monaco-menu-container > .monaco-scrollable-element";
