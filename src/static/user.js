@@ -58,7 +58,7 @@
       for (let mutation of mutations) {
         for (let node of mutation.addedNodes) {
           if (node.matches?.(selector)) {
-            console.log(">>", node);
+            // console.log(">>", node);
             modify(node);
           }
         }
