@@ -2,7 +2,7 @@
 	"name": "vscode-custom-contextmenu",
 	"displayName": "Custom Contextmenu",
 	"description": "Custom Cleaner Contextmenu for Visual Studio Code",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"publisher": "BHznJNs",
 	"engines": {
 		"vscode": "^1.92.0"

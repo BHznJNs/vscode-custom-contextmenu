@@ -98,15 +98,10 @@ function activate(context) {
 	// #### Patching ##############################################################
 
 	async function performPatch(uuidSession) {
-		const config = vscode.workspace.getConfiguration("vscode_custom_css");
-		if (!patchIsProperlyConfigured(config)) {
-			return vscode.window.showInformationMessage(msg.notConfigured);
-		}
-
 		let html = await fs.promises.readFile(htmlFile, "utf-8");
 		html = clearExistingPatches(html);
 
-		const injectHTML = await patchScript(config);
+		const injectHTML = await patchScript();
 		html = html.replace(/<meta\s+http-equiv="Content-Security-Policy"[\s\S]*?\/>/, "");
 
 		html = html.replace(
